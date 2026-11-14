@@ -1,11 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Github, ExternalLink, ChevronLeft, ChevronRight, Layers, CheckCircle2, X } from 'lucide-react';
+import { Github, ExternalLink, ChevronLeft, ChevronRight, Layers, CheckCircle2, X, ArrowLeft } from 'lucide-react';
 import { projectsData } from '../data/portfolioData';
 
 export default function Projects() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedProject, setSelectedProject] = useState(null);
+
+  // Lock body scroll and listen for Escape key when modal is open
+  useEffect(() => {
+    if (!selectedProject) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setSelectedProject(null);
+      }
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = 'unset';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedProject]);
 
   const nextSlide = () => {
     setCurrentIndex((prev) => (prev + 1) % projectsData.length);
@@ -18,7 +37,7 @@ export default function Projects() {
   return (
     <section id="work" className="relative py-24 sm:py-32 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
-        
+
         {/* Section Heading */}
         <div className="text-center mb-14">
           <motion.p
@@ -143,11 +162,10 @@ export default function Projects() {
               key={idx}
               onClick={() => setCurrentIndex(idx)}
               aria-label={`Go to project slide ${idx + 1}`}
-              className={`transition-all duration-300 rounded-full ${
-                currentIndex === idx
+              className={`transition-all duration-300 rounded-full ${currentIndex === idx
                   ? 'w-8 h-2 bg-[#FFD600]'
                   : 'w-2 h-2 bg-[#2A2A32] hover:bg-white/40'
-              }`}
+                }`}
             />
           ))}
         </div>
@@ -157,25 +175,42 @@ export default function Projects() {
       {/* Project Details Modal */}
       <AnimatePresence>
         {selectedProject && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+          <div
+            onClick={() => setSelectedProject(null)}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto"
+          >
             <motion.div
+              onClick={(e) => e.stopPropagation()}
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.25 }}
-              className="relative w-full max-w-2xl bg-[#101014] border border-white/[0.08] rounded-3xl p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.9)] max-h-[90vh] overflow-y-auto"
+              className="relative w-full max-w-2xl bg-[#101014] border border-white/[0.08] rounded-3xl p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.95)] max-h-[90vh] overflow-y-auto my-auto"
             >
-              {/* Close Button */}
-              <button
-                onClick={() => setSelectedProject(null)}
-                aria-label="Close modal"
-                className="absolute top-5 right-5 p-2 rounded-full bg-white/5 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-              >
-                <X size={20} />
-              </button>
+              {/* Top Navigation Bar: Prominent Back Button & Close */}
+              <div className="flex items-center justify-between pb-4 mb-5 border-b border-white/[0.08]">
+                <button
+                  type="button"
+                  onClick={() => setSelectedProject(null)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#151519] border border-white/[0.1] text-xs sm:text-sm font-bold text-white hover:text-black hover:bg-[#FFD600] hover:border-[#FFD600] transition-all duration-200 group cursor-pointer shadow-md"
+                >
+                  <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
+                  <span>Back to Projects</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedProject(null)}
+                  aria-label="Close modal"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#151519] border border-white/[0.08] text-xs font-semibold text-white/70 hover:text-black hover:bg-[#FFD600] hover:border-[#FFD600] transition-colors cursor-pointer"
+                >
+                  <span>Close</span>
+                  <X size={16} />
+                </button>
+              </div>
 
               {/* Modal Header */}
-              <div className="pr-8">
+              <div>
                 <span className="text-xs font-mono font-semibold text-[#FFD600] uppercase tracking-wider">
                   {selectedProject.badge}
                 </span>
@@ -261,13 +296,22 @@ export default function Projects() {
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center gap-4 mt-7 pt-5 border-t border-white/[0.08]">
+              {/* Action Buttons: Including Bottom Back Button */}
+              <div className="flex flex-col sm:flex-row items-center gap-3 mt-7 pt-5 border-t border-white/[0.08]">
+                <button
+                  type="button"
+                  onClick={() => setSelectedProject(null)}
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl bg-[#151519] hover:bg-white/10 text-white font-semibold text-sm flex items-center justify-center gap-2 border border-white/10 hover:border-[#FFD600]/50 transition-all cursor-pointer"
+                >
+                  <ArrowLeft size={16} />
+                  <span>Back to Projects</span>
+                </button>
+
                 <a
                   href={selectedProject.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-sm flex items-center justify-center gap-2 border border-white/10 transition-colors"
+                  className="flex-1 w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-sm flex items-center justify-center gap-2 border border-white/10 transition-colors"
                 >
                   <Github size={17} />
                   <span>View Repository</span>
@@ -277,7 +321,7 @@ export default function Projects() {
                     href={selectedProject.liveDemo}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 py-3 rounded-xl bg-[#FFD600] hover:bg-[#FFE033] text-black font-bold text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,214,0,0.35)] transition-all"
+                    className="flex-1 w-full py-3 rounded-xl bg-[#FFD600] hover:bg-[#FFE033] text-black font-bold text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,214,0,0.35)] transition-all"
                   >
                     <ExternalLink size={17} />
                     <span>Launch Live Demo</span>

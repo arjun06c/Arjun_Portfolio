@@ -8,7 +8,14 @@ const rateLimitMap = new Map();
 export const submitContact = async (req, res, next) => {
   try {
     const { name, email, subject, message } = req.body;
-    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+    let clientIp = '127.0.0.1';
+    try {
+      clientIp = req.headers?.['x-forwarded-for']?.split(',')[0]?.trim() || 
+                 req.socket?.remoteAddress || 
+                 '127.0.0.1';
+    } catch {
+      clientIp = '127.0.0.1';
+    }
 
     // Rate limiting: allow 1 message per 15 seconds per IP
     const now = Date.now();

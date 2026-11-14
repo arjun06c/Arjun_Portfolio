@@ -8,8 +8,8 @@ const cache = {
   githubTimestamp: 0
 };
 
-const getLeetCodeUsername = () => process.env.LEETCODE_USERNAME || 'arjun06c';
-const getGitHubUsername = () => process.env.GITHUB_USERNAME || 'arjun06c';
+const getLeetCodeUsername = () => (process.env.LEETCODE_USERNAME || 'arjun06c').trim();
+const getGitHubUsername = () => (process.env.GITHUB_USERNAME || 'arjun06c').trim();
 
 /**
  * Calculates current consecutive submission streak from LeetCode submissionCalendar
